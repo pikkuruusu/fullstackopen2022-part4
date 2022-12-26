@@ -106,3 +106,24 @@ describe('favorite blog', () => {
     })
   })
 })
+
+describe('most blogs', () => {
+  test('of empty list is empty object', () => {
+    console.log(listHelper.mostBlogs(listWithZeroBlogs))
+    expect(listHelper.mostBlogs(listWithZeroBlogs)).toStrictEqual({})
+  })
+
+  test('when list only has one blog returns that author', () => {
+    expect(listHelper.mostBlogs(listWithOneBlog)).toEqual({
+      author: 'Michael Chan',
+      blogs: 1
+    })
+  })
+
+  test('of a bigger list returns first author with most blogs', () => {
+    expect(listHelper.mostBlogs(listWithMultipleBlogs)).toEqual({
+      author: 'Robert C. Martin',
+      blogs: 3
+    })
+  })
+})
