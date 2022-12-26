@@ -7,10 +7,21 @@ const totalLikes = (blogs) => {
     return sum + blog.likes
   }
 
-  return blogs.reduce( reducer, 0)
+  return blogs.reduce(reducer, 0)
+}
+
+const favoriteBlog = (blogs) => {
+  const reducer = (previous, current) => {
+    return (previous.likes >= current.likes) ? previous : current
+  }
+
+  const formatBlogObject = ({ title, author, likes }) => ({ title, author, likes })
+
+  return blogs.length ? formatBlogObject(blogs.reduce(reducer)) : {}
 }
 
 module.exports = {
   dummy,
-  totalLikes
+  totalLikes,
+  favoriteBlog
 }
