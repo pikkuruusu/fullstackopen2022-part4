@@ -24,19 +24,38 @@ const favoriteBlog = (blogs) => {
 
 const mostBlogs = (blogs) => {
   const authorCount =
-  _(blogs).groupBy('author').map((value, key) => {
-    return ({
-      author: key,
-      blogs: value.length
-    })
-  }).value()
+    _(blogs).groupBy('author')
+      .map((value, key) => {
+        return ({
+          author: key,
+          blogs: value.length
+        })
+      })
+      .value()
 
   return blogs.length ? _.maxBy(authorCount, 'blogs') : {}
+}
+
+const mostLikes = (blogs) => {
+  const authorLikesSum =
+    _(blogs).groupBy('author')
+      .map((value, key) => {
+        return ({
+          author: key,
+          likes: _.sumBy(value, 'likes')
+        })
+      })
+      .value()
+
+  console.log(_.maxBy(authorLikesSum, 'likes'))
+
+  return blogs.length ? _.maxBy(authorLikesSum, 'likes') : {}
 }
 
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }

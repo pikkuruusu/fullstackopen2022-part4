@@ -90,7 +90,7 @@ describe('favorite blog', () => {
     expect(listHelper.favoriteBlog(listWithZeroBlogs)).toStrictEqual({})
   })
 
-  test('when test only has ine blog returns that', () => {
+  test('when test only has one blog returns that', () => {
     expect(listHelper.favoriteBlog(listWithOneBlog)).toEqual({
       title: 'React patterns',
       author: 'Michael Chan',
@@ -98,7 +98,7 @@ describe('favorite blog', () => {
     })
   })
 
-  test('of a bigger list return first blog with highest like', () => {
+  test('of a bigger list return first blog with most likes', () => {
     expect(listHelper.favoriteBlog(listWithMultipleBlogs)).toEqual({
       title: 'Canonical string reduction',
       author: 'Edsger W. Dijkstra',
@@ -124,6 +124,26 @@ describe('most blogs', () => {
     expect(listHelper.mostBlogs(listWithMultipleBlogs)).toEqual({
       author: 'Robert C. Martin',
       blogs: 3
+    })
+  })
+})
+
+describe('most likes',() => {
+  test('of empty list is empty object', () => {
+    console.log(listHelper.mostLikes(listWithZeroBlogs))
+    expect(listHelper.mostLikes(listWithZeroBlogs)).toStrictEqual({})
+  })
+
+  test('when list only has one blog returns that author', () => {
+    expect(listHelper.mostLikes(listWithOneBlog)).toEqual({
+      author: 'Michael Chan',
+      likes: 7
+    })
+  })
+  test('of a bigger list returns first author with most likes', () => {
+    expect(listHelper.mostLikes(listWithMultipleBlogs)).toEqual({
+      author: 'Edsger W. Dijkstra',
+      likes: 17
     })
   })
 })
