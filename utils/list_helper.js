@@ -47,8 +47,6 @@ const mostLikes = (blogs) => {
       })
       .value()
 
-  console.log(_.maxBy(authorLikesSum, 'likes'))
-
   return blogs.length ? _.maxBy(authorLikesSum, 'likes') : {}
 }
 

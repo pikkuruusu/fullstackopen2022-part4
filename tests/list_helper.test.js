@@ -86,7 +86,6 @@ describe('total likes', () => {
 
 describe('favorite blog', () => {
   test('of empty list is empty object', () => {
-    console.log(listHelper.favoriteBlog(listWithZeroBlogs))
     expect(listHelper.favoriteBlog(listWithZeroBlogs)).toStrictEqual({})
   })
 
@@ -109,7 +108,6 @@ describe('favorite blog', () => {
 
 describe('most blogs', () => {
   test('of empty list is empty object', () => {
-    console.log(listHelper.mostBlogs(listWithZeroBlogs))
     expect(listHelper.mostBlogs(listWithZeroBlogs)).toStrictEqual({})
   })
 
@@ -130,7 +128,6 @@ describe('most blogs', () => {
 
 describe('most likes',() => {
   test('of empty list is empty object', () => {
-    console.log(listHelper.mostLikes(listWithZeroBlogs))
     expect(listHelper.mostLikes(listWithZeroBlogs)).toStrictEqual({})
   })
 
