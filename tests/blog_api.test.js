@@ -19,12 +19,10 @@ beforeEach(async () => {
 })
 
 test('two blogs are returned as JSON', async () => {
-  await api
+  const response = await api
     .get('/api/blogs')
     .expect(200)
     .expect('Content-Type', /application\/json/)
-
-  const response = await api.get('/api/blogs')
 
   expect(response.body).toHaveLength(helper.initialBlogs.length)
 }, 100000)
