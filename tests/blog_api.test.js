@@ -6,7 +6,6 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
-const { response } = require('../app')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -34,6 +33,31 @@ test('the identifier property is named id', async () => {
     .expect('Content-Type', /application\/json/)
 
   expect(response.body[0].id).toBeDefined()
+})
+
+test('a blog can be added', async () => {
+  const newBlog = {
+    'title': 'This is a testblog',
+    'author': 'Snoopy is testing',
+    'url': 'https://snoopy.com/testblog',
+    'likes': 456
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+
+  const blogsWithoutId = response.body.map(r => {
+    delete r.id
+    return r
+  })
+
+  expect(response.body).toHaveLength(helper.initialBlogs.length + 1)
+  expect(blogsWithoutId).toContainEqual(newBlog)
 })
 
 afterAll(() => {
