@@ -49,15 +49,35 @@ test('a blog can be added', async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const response = await api.get('/api/blogs')
+  const blogsAtEnd = await helper.blogsInDb()
 
-  const blogsWithoutId = response.body.map(r => {
+  const blogsWithoutId = blogsAtEnd.map(r => {
     delete r.id
     return r
   })
 
-  expect(response.body).toHaveLength(helper.initialBlogs.length + 1)
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
   expect(blogsWithoutId).toContainEqual(newBlog)
+})
+
+test('a missing likes property defaults to zero', async () => {
+  const newBlog = {
+    'title': 'This blog is missing a likes property ',
+    'author': 'Snoopy is testing again',
+    'url': 'https://snoopy.com/testblog2'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const lastBlogAdded = blogsAtEnd[blogsAtEnd.length-1]
+
+  expect(lastBlogAdded.likes).toEqual(0)
+
 })
 
 afterAll(() => {
