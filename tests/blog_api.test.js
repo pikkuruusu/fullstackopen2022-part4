@@ -77,7 +77,36 @@ test('a missing likes property defaults to zero', async () => {
   const lastBlogAdded = blogsAtEnd[blogsAtEnd.length-1]
 
   expect(lastBlogAdded.likes).toEqual(0)
+})
 
+test('a blog without title or url is not added', async () => {
+  const newBlogMissingTitle = {
+    'author': 'Snoopy is missing title',
+    'url': 'https://snoopy.com/testblog2',
+    'likes': 123
+  }
+
+  const newBlogMissingUrl = {
+    'title': 'This blog is missing an url',
+    'author': 'Snoopy is missing an url',
+    'likes': 123
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlogMissingTitle)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+
+  await api
+    .post('/api/blogs')
+    .send(newBlogMissingUrl)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
 afterAll(() => {
