@@ -122,6 +122,34 @@ test('deleting a blog by id', async () => {
   expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
 })
 
+test('updating a blog by id', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToUpdate = blogsAtStart[0]
+
+  const newBlogContent = {
+    'title': 'This is updated content',
+    'author': 'Snoopy with update',
+    'url': 'https://snoopy.com/update',
+    'likes': 1234
+  }
+
+  await api
+    .put('/api/blogs/' + blogToUpdate.id)
+    .send(newBlogContent)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const updatedBlogWithoudId = {
+    'title': blogsAtEnd[0].title,
+    'author': blogsAtEnd[0].author,
+    'url': blogsAtEnd[0].url,
+    'likes': blogsAtEnd[0].likes
+  }
+
+  expect(updatedBlogWithoudId).toEqual(newBlogContent)
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
