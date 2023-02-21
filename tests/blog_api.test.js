@@ -163,7 +163,7 @@ describe('when there is initially one user in the db', () => {
     await User.deleteMany({})
 
     const passwordHash = await bcrypt.hash('hemlit', 10)
-    const user = new User({username: 'root', name: 'rooter', passwordHash })
+    const user = new User({ username: 'root', name: 'rooter', passwordHash })
 
     await user.save()
   })
@@ -188,6 +188,106 @@ describe('when there is initially one user in the db', () => {
 
     const usernames = usersAtEnd.map(user => user.username)
     expect(usernames).toContain(newUser.username)
+  })
+
+  describe('user creation fails if', () => {
+    test('username is too short', async () => {
+      const userAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'ne',
+        name: 'Testy McTesface',
+        password: 'secretsecret'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      const usersAtEnd = await helper.usersInDb()
+
+      expect(usersAtEnd).toHaveLength(userAtStart.length)
+    })
+
+    test('password is too short', async () => {
+      const userAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'newuser',
+        name: 'Testy McTesface',
+        password: 'se'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      const usersAtEnd = await helper.usersInDb()
+
+      expect(usersAtEnd).toHaveLength(userAtStart.length)
+    })
+
+    test('username is missing', async () => {
+      const userAtStart = await helper.usersInDb()
+
+      const newUser = {
+        name: 'Testy McTesface',
+        password: 'secretsecret'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      const usersAtEnd = await helper.usersInDb()
+
+      expect(usersAtEnd).toHaveLength(userAtStart.length)
+    })
+
+    test('password is missing', async () => {
+      const userAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'newuser',
+        name: 'Testy McTesface'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      const usersAtEnd = await helper.usersInDb()
+
+      expect(usersAtEnd).toHaveLength(userAtStart.length)
+    })
+
+    test('user already exists', async () => {
+      const userAtStart = await helper.usersInDb()
+
+      const newUser = {
+        username: 'root',
+        name: 'Testy McTesface',
+        password: 'secretsecret'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(409)
+        .expect('Content-Type', /application\/json/)
+
+      const usersAtEnd = await helper.usersInDb()
+
+      expect(usersAtEnd).toHaveLength(userAtStart.length)
+    })
   })
 })
 
