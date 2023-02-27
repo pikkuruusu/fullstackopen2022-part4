@@ -17,6 +17,13 @@ beforeEach(async () => {
 
     await blogObject.save()
   }
+
+  await User.deleteMany({})
+
+  const passwordHash = await bcrypt.hash('hemlit', 10)
+  const user = new User({ username: 'root', name: 'rooter', passwordHash })
+
+  await user.save()
 })
 
 describe('when there are two blogs initially in the db', () => {
@@ -41,6 +48,16 @@ describe('when there are two blogs initially in the db', () => {
 
 describe('adding a blog to the db', () => {
   test('succeeds', async () => {
+    const response = await api
+      .post('/api/login')
+      .send({
+        'username': 'root',
+        'password': 'hemlit'
+      })
+      .expect(200)
+
+    const user = response.body
+
     const newBlog = {
       'title': 'This is a testblog',
       'author': 'Snoopy is testing',
@@ -51,18 +68,37 @@ describe('adding a blog to the db', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set({ Authorization: 'Bearer ' + user.token })
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
     const blogsAtEnd = await helper.blogsInDb()
 
-    const blogsWithoutId = blogsAtEnd.map(r => {
-      delete r.id
-      return r
-    })
-
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
-    expect(blogsWithoutId).toContainEqual(newBlog)
+
+    const titles = blogsAtEnd.map(blog => blog.title)
+
+    expect(titles).toContain('This is a testblog')
+  })
+
+  test('fails with status 401 Unauthorized if no token is provided', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const newBlog = {
+      'title': 'This is a testblog',
+      'author': 'Snoopy is testing',
+      'url': 'https://snoopy.com/testblog',
+      'likes': 456
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
   })
 
   test('with a missing likes property defaults likes to zero', async () => {
@@ -72,9 +108,20 @@ describe('adding a blog to the db', () => {
       'url': 'https://snoopy.com/testblog2'
     }
 
+    const response = await api
+      .post('/api/login')
+      .send({
+        'username': 'root',
+        'password': 'hemlit'
+      })
+      .expect(200)
+
+    const user = response.body
+
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set({ Authorization: 'Bearer ' + user.token })
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -97,15 +144,27 @@ describe('adding a blog to the db', () => {
       'likes': 123
     }
 
+    const response = await api
+      .post('/api/login')
+      .send({
+        'username': 'root',
+        'password': 'hemlit'
+      })
+      .expect(200)
+
+    const user = response.body
+
     await api
       .post('/api/blogs')
       .send(newBlogMissingTitle)
+      .set({ Authorization: 'Bearer ' + user.token })
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
     await api
       .post('/api/blogs')
       .send(newBlogMissingUrl)
+      .set({ Authorization: 'Bearer ' + user.token })
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
@@ -117,11 +176,36 @@ describe('adding a blog to the db', () => {
 
 describe('a blog can', () => {
   test('be deleted by id', async () => {
+    const newBlog = {
+      'title': 'This blog is missing a likes property ',
+      'author': 'Snoopy is testing again',
+      'url': 'https://snoopy.com/testblog2'
+    }
+
+    const response = await api
+      .post('/api/login')
+      .send({
+        'username': 'root',
+        'password': 'hemlit'
+      })
+      .expect(200)
+
+    const user = response.body
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set({ Authorization: 'Bearer ' + user.token })
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
     const blogsAtStart = await helper.blogsInDb()
-    const blogToDelete = blogsAtStart[0]
+
+    const blogToDelete = blogsAtStart[blogsAtStart.length - 1]
 
     await api
       .delete('/api/blogs/' + blogToDelete.id)
+      .set({ Authorization: 'Bearer ' + user.token })
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
@@ -159,15 +243,6 @@ describe('a blog can', () => {
 })
 
 describe('when there is initially one user in the db', () => {
-  beforeEach(async () => {
-    await User.deleteMany({})
-
-    const passwordHash = await bcrypt.hash('hemlit', 10)
-    const user = new User({ username: 'root', name: 'rooter', passwordHash })
-
-    await user.save()
-  })
-
   test('user creation succeeds with a fresh username', async () => {
     const userAtStart = await helper.usersInDb()
 
